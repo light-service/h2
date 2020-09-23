@@ -2,51 +2,42 @@ package log
 
 import "github.com/sirupsen/logrus"
 
-type LogrusLogger struct {
+type Logrus struct {
 	logger *logrus.Logger
 }
 
-func AdaptLogrusLogger(l *logrus.Logger) *LogrusLogger {
-	return &LogrusLogger{
+func NewLogrus(l *logrus.Logger) *Logrus {
+	return &Logrus{
 		logger: l,
 	}
 }
 
-func (l *LogrusLogger) Fatal(args ...interface{}) {
-	l.logger.Fatal(args...)
+func (l *Logrus) Fatal(mixedArgs ...interface{}) {
+	fields, args := l.fields(mixedArgs)
+	l.logger.WithFields(fields).Fatal(args...)
 }
 
-func (l *LogrusLogger) Fatalf(format string, args ...interface{}) {
-	l.logger.Fatalf(format, args...)
+func (l *Logrus) Error(mixedArgs ...interface{}) {
+	fields, args := l.fields(mixedArgs)
+	l.logger.WithFields(fields).Error(args...)
 }
 
-func (l *LogrusLogger) Error(args ...interface{}) {
-	l.logger.Error(args...)
+func (l *Logrus) Warn(mixedArgs ...interface{}) {
+	fields, args := l.fields(mixedArgs)
+	l.logger.WithFields(fields).Warn(args...)
 }
 
-func (l *LogrusLogger) Errorf(format string, args ...interface{}) {
-	l.logger.Errorf(format, args...)
+func (l *Logrus) Info(mixedArgs ...interface{}) {
+	fields, args := l.fields(mixedArgs)
+	l.logger.WithFields(fields).Info(args...)
 }
 
-func (l *LogrusLogger) Warn(args ...interface{}) {
-	l.logger.Warn(args...)
+func (l *Logrus) Debug(mixedArgs ...interface{}) {
+	fields, args := l.fields(mixedArgs)
+	l.logger.WithFields(fields).Debug(args...)
 }
 
-func (l *LogrusLogger) Warnf(format string, args ...interface{}) {
-	l.logger.Warnf(format, args...)
-}
-
-func (l *LogrusLogger) Info(args ...interface{}) {
-	l.logger.Info(args...)
-}
-
-func (l *LogrusLogger) Infof(format string, args ...interface{}) {
-	l.logger.Infof(format, args...)
-}
-
-func (l *LogrusLogger) Debug(args ...interface{}) {
-	l.logger.Debug(args...)
-}
-func (l *LogrusLogger) Debugf(format string, args ...interface{}) {
-	l.logger.Debugf(format, args...)
+func (l *Logrus) fields(mixedArgs []interface{}) (logrus.Fields, []interface{}) {
+	f, args := FromArgs(mixedArgs)
+	return logrus.Fields(f), args
 }

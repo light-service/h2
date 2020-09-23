@@ -6,106 +6,82 @@ import (
 	"os"
 )
 
-// StdLoggerLevel type
-type StdLoggerLevel uint32
+// StdLevel type
+type StdLevel uint32
 
 // These are the different logging levels.
 const (
-	// StdLoggerLevelFatal level. Logs and then calls `os.Exit(1)`.
-	StdLoggerLevelFatal StdLoggerLevel = iota
-	// StdLoggerLevelError level. Logs. Used for errors that should definitely be noted.
+	// StdLevelFatal level. Logs and then calls `os.Exit(1)`.
+	StdLevelFatal StdLevel = iota
+	// StdLevelError level. Logs. Used for errors that should definitely be noted.
 	// Commonly used for hooks to send errors to an error tracking service.
-	StdLoggerLevelError
-	// StdLoggerLevelWarn level. Non-critical entries that deserve eyes.
-	StdLoggerLevelWarn
-	// StdLoggerLevelInfo level. General operational entries about what's going on inside the
+	StdLevelError
+	// StdLevelWarn level. Non-critical entries that deserve eyes.
+	StdLevelWarn
+	// StdLevelInfo level. General operational entries about what's going on inside the
 	// application.
-	StdLoggerLevelInfo
-	// StdLoggerLevelDebug level. Usually only enabled when debugging. Very verbose logging.
-	StdLoggerLevelDebug
+	StdLevelInfo
+	// StdLevelDebug level. Usually only enabled when debugging. Very verbose logging.
+	StdLevelDebug
 )
 
-func stdLevelText(level StdLoggerLevel) string {
+func stdLevelText(level StdLevel) string {
 	switch level {
-	case StdLoggerLevelFatal:
+	case StdLevelFatal:
 		return "FATAL"
-	case StdLoggerLevelError:
+	case StdLevelError:
 		return "ERROR"
-	case StdLoggerLevelWarn:
+	case StdLevelWarn:
 		return "WARN"
-	case StdLoggerLevelInfo:
+	case StdLevelInfo:
 		return "INFO"
-	case StdLoggerLevelDebug:
+	case StdLevelDebug:
 		return "DEBUG"
 	default:
 		return "UNKNOWN"
 	}
 }
 
-type StdLogger struct {
-	level  StdLoggerLevel
+type Std struct {
+	level  StdLevel
 	logger *stdLog.Logger
 }
 
-func AdaptStdLogger(level StdLoggerLevel, logger *stdLog.Logger) *StdLogger {
-	return &StdLogger{
+func NewStd(level StdLevel, logger *stdLog.Logger) *Std {
+	return &Std{
 		level:  level,
 		logger: logger,
 	}
 }
 
-func (s *StdLogger) SetLevel(level StdLoggerLevel) {
+func (s *Std) SetLevel(level StdLevel) {
 	s.level = level
 }
 
-func (s *StdLogger) Fatal(args ...interface{}) {
-	s.print(StdLoggerLevelFatal, args...)
+func (s *Std) Fatal(args ...interface{}) {
+	s.print(StdLevelFatal, args...)
 	os.Exit(1)
 }
 
-func (s *StdLogger) Fatalf(format string, args ...interface{}) {
-	s.printf(StdLoggerLevelFatal, format, args...)
-	os.Exit(1)
-}
-func (s *StdLogger) Error(args ...interface{}) {
-	s.print(StdLoggerLevelError, args...)
+func (s *Std) Error(args ...interface{}) {
+	s.print(StdLevelError, args...)
 }
 
-func (s *StdLogger) Errorf(format string, args ...interface{}) {
-	s.printf(StdLoggerLevelError, format, args...)
+func (s *Std) Warn(args ...interface{}) {
+	s.print(StdLevelWarn, args...)
 }
 
-func (s *StdLogger) Warn(args ...interface{}) {
-	s.print(StdLoggerLevelWarn, args...)
+func (s *Std) Info(args ...interface{}) {
+	s.print(StdLevelInfo, args...)
 }
 
-func (s *StdLogger) Warnf(format string, args ...interface{}) {
-	s.printf(StdLoggerLevelWarn, format, args...)
+func (s *Std) Debug(args ...interface{}) {
+	s.print(StdLevelDebug, args...)
 }
 
-func (s *StdLogger) Info(args ...interface{}) {
-	s.print(StdLoggerLevelInfo, args...)
-}
-
-func (s *StdLogger) Infof(format string, args ...interface{}) {
-	s.printf(StdLoggerLevelInfo, format, args...)
-}
-
-func (s *StdLogger) Debug(args ...interface{}) {
-	s.print(StdLoggerLevelDebug, args...)
-}
-
-func (s *StdLogger) Debugf(format string, args ...interface{}) {
-	s.printf(StdLoggerLevelDebug, format, args...)
-}
-
-func (s *StdLogger) printf(level StdLoggerLevel, format string, args ...interface{}) {
-	s.print(level, fmt.Sprintf(format, args))
-}
-
-func (s *StdLogger) print(level StdLoggerLevel, args ...interface{}) {
+func (s *Std) print(level StdLevel, args ...interface{}) {
 	if level > s.level {
 		return
 	}
-	_ = s.logger.Output(3, stdLevelText(level)+" "+fmt.Sprint(args...))
+	_ = s.logger.Output(3, stdLevelText(level)+" "+fmt.Sprintln(args...))
 }

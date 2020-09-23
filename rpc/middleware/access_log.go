@@ -8,13 +8,20 @@ import (
 	"time"
 )
 
-func NewAccessLogInterceptor(logger log.Logger) grpc.UnaryServerInterceptor {
+func NewAccessLogInterceptor(logger log.Interface) grpc.UnaryServerInterceptor {
+	fieldLogger := log.AdaptFieldLogger(logger)
+
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 		since := time.Now()
 		defer func() {
 			elapsed := time.Since(since)
 			reqJson, _ := json.Marshal(req)
-			logger.Infof("%s: req=%s, err=%s, elapsed=%.2f", info.FullMethod, reqJson, err, float64(elapsed)/float64(time.Second))
+			fieldLogger.WithFields(map[string]interface{}{
+				"full_method": info.FullMethod,
+				"request":     reqJson,
+				"error":       err,
+				"elapsed":     elapsed,
+			}).Info()
 		}()
 
 		resp, err = handler(ctx, req)

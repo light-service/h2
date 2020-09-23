@@ -11,5 +11,4 @@ require (
 	github.com/stretchr/testify v1.6.1
 	google.golang.org/grpc v1.32.0
 	google.golang.org/protobuf v1.23.0
-	github.com/light-service/protobuf v0.0.0-20200918161103-a4c6f691850d
 )
