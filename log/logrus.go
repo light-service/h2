@@ -38,6 +38,6 @@ func (l *Logrus) Debug(mixedArgs ...interface{}) {
 }
 
 func (l *Logrus) fields(mixedArgs []interface{}) (logrus.Fields, []interface{}) {
-	f, args := FromArgs(mixedArgs)
+	f, args := SplitArgs(mixedArgs)
 	return logrus.Fields(f), args
 }

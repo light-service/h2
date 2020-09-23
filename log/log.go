@@ -79,7 +79,7 @@ func (f Fields) String() string {
 	return "{ " + strings.Join(pairs, ", ") + " }"
 }
 
-func FromArgs(mixedArgs []interface{}) (fields Fields, args []interface{}) {
+func SplitArgs(mixedArgs []interface{}) (fields Fields, args []interface{}) {
 	fields = make(Fields)
 	for _, m := range mixedArgs {
 		switch m.(type) {
@@ -142,7 +142,7 @@ func (e *Entry) Debugf(format string, args ...interface{}) {
 }
 
 func (e *Entry) WithError(err error) *Entry {
-	e.fields["error"] = err
+	e.fields[errorFieldName] = err
 	return e
 }
 
@@ -165,6 +165,8 @@ func (e *Entry) argsf(format string, args ...interface{}) []interface{} {
 	return []interface{}{arg0, e.fields}
 }
 
+const errorFieldName = "error"
+
 type FieldLogger interface {
 	Logger
 	WithError(err error) *Entry
@@ -185,7 +187,7 @@ func AdaptFieldLogger(l Interface) FieldLogger {
 }
 
 func (f *fieldLogger) WithError(err error) *Entry {
-	return newEntry(f.Logger, Fields{"error": err})
+	return newEntry(f.Logger, Fields{errorFieldName: err})
 }
 
 func (f *fieldLogger) WithField(name string, value interface{}) *Entry {
