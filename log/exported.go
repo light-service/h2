@@ -30,6 +30,11 @@ func WithFields(fields map[string]interface{}) *Entry {
 	return defaultLogger.WithFields(fields)
 }
 
+// Trace logs a message at level Trace on the standard logger.
+func Trace(args ...interface{}) {
+	defaultLogger.Trace(args...)
+}
+
 // Debug logs a message at level Debug on the standard logger.
 func Debug(args ...interface{}) {
 	defaultLogger.Debug(args...)
@@ -55,6 +60,16 @@ func Fatal(args ...interface{}) {
 	defaultLogger.Fatal(args...)
 }
 
+// Panic logs a message at level Panic on the standard logger then panic with args.
+func Panic(args ...interface{}) {
+	defaultLogger.Panic(args...)
+}
+
+// Tracef logs a message at level Trace on the standard logger.
+func Tracef(format string, args ...interface{}) {
+	defaultLogger.Trace(fmt.Sprintf(format, args...))
+}
+
 // Debugf logs a message at level Debug on the standard logger.
 func Debugf(format string, args ...interface{}) {
 	defaultLogger.Debug(fmt.Sprintf(format, args...))
@@ -78,4 +93,9 @@ func Errorf(format string, args ...interface{}) {
 // Fatalf logs a message at level Fatal on the standard logger then the process will exit with status set to 1.
 func Fatalf(format string, args ...interface{}) {
 	defaultLogger.Fatal(fmt.Sprintf(format, args...))
+}
+
+// Panicf logs a message at level Panic on the standard logger then panic with args.
+func Panicf(format string, args ...interface{}) {
+	defaultLogger.Panic(fmt.Sprintf(format, args...))
 }

@@ -6,14 +6,18 @@ import (
 )
 
 type Interface interface {
+	Panic(args ...interface{})
 	Fatal(args ...interface{})
 	Error(args ...interface{})
 	Warn(args ...interface{})
 	Info(args ...interface{})
 	Debug(args ...interface{})
+	Trace(args ...interface{})
 }
 
 type Logger interface {
+	Panic(args ...interface{})
+	Panicf(format string, args ...interface{})
 	Fatal(args ...interface{})
 	Fatalf(format string, args ...interface{})
 	Error(args ...interface{})
@@ -24,6 +28,8 @@ type Logger interface {
 	Infof(format string, args ...interface{})
 	Debug(args ...interface{})
 	Debugf(format string, args ...interface{})
+	Trace(args ...interface{})
+	Tracef(format string, args ...interface{})
 }
 
 type logger struct {
@@ -31,11 +37,18 @@ type logger struct {
 }
 
 func AdaptLogger(l Interface) Logger {
+	if _, ok := l.(*Entry); ok {
+		panic("logger must not be *Entry")
+	}
 	if f, ok := l.(Logger); ok {
 		return f
 	}
 
 	return &logger{l}
+}
+
+func (l *logger) Panicf(format string, args ...interface{}) {
+	l.Panic(fmt.Sprintf(format, args...))
 }
 
 func (l *logger) Fatalf(format string, args ...interface{}) {
@@ -56,6 +69,10 @@ func (l *logger) Infof(format string, args ...interface{}) {
 
 func (l *logger) Debugf(format string, args ...interface{}) {
 	l.Debug(fmt.Sprintf(format, args...))
+}
+
+func (l *logger) Tracef(format string, args ...interface{}) {
+	l.Trace(fmt.Sprintf(format, args...))
 }
 
 type Fields map[string]interface{}
@@ -101,6 +118,14 @@ func newEntry(logger Logger, fields Fields) *Entry {
 	return &Entry{logger, fields}
 }
 
+func (e *Entry) Panic(args ...interface{}) {
+	e.logger.Panic(e.args(args)...)
+}
+
+func (e *Entry) Panicf(format string, args ...interface{}) {
+	e.logger.Panic(e.argsf(format, args...)...)
+}
+
 func (e *Entry) Fatal(args ...interface{}) {
 	e.logger.Fatal(e.args(args)...)
 }
@@ -141,6 +166,14 @@ func (e *Entry) Debugf(format string, args ...interface{}) {
 	e.logger.Debug(e.argsf(format, args...)...)
 }
 
+func (e *Entry) Trace(args ...interface{}) {
+	e.logger.Trace(e.args(args)...)
+}
+
+func (e *Entry) Tracef(format string, args ...interface{}) {
+	e.logger.Trace(e.argsf(format, args...)...)
+}
+
 func (e *Entry) WithError(err error) *Entry {
 	e.fields[errorFieldName] = err
 	return e
@@ -179,11 +212,17 @@ type fieldLogger struct {
 }
 
 func AdaptFieldLogger(l Interface) FieldLogger {
-	if f, ok := l.(FieldLogger); ok {
-		return f
+	if _, ok := l.(*Entry); ok {
+		panic("logger must not be *Entry")
 	}
 
-	return &fieldLogger{AdaptLogger(l)}
+	if f, ok := l.(FieldLogger); ok {
+		return f
+	} else if f, ok := l.(Logger); ok {
+		return &fieldLogger{f}
+	} else {
+		return &fieldLogger{AdaptLogger(l)}
+	}
 }
 
 func (f *fieldLogger) WithError(err error) *Entry {

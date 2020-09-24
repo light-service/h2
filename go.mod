@@ -11,4 +11,5 @@ require (
 	github.com/stretchr/testify v1.6.1
 	google.golang.org/grpc v1.32.0
 	google.golang.org/protobuf v1.23.0
+	github.com/go-redis/redis/v8 v8.2.0
 )

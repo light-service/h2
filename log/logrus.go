@@ -12,6 +12,11 @@ func NewLogrus(l *logrus.Logger) *Logrus {
 	}
 }
 
+func (l *Logrus) Panic(mixedArgs ...interface{}) {
+	fields, args := l.fields(mixedArgs)
+	l.logger.WithFields(fields).Panic(args...)
+}
+
 func (l *Logrus) Fatal(mixedArgs ...interface{}) {
 	fields, args := l.fields(mixedArgs)
 	l.logger.WithFields(fields).Fatal(args...)
@@ -35,6 +40,11 @@ func (l *Logrus) Info(mixedArgs ...interface{}) {
 func (l *Logrus) Debug(mixedArgs ...interface{}) {
 	fields, args := l.fields(mixedArgs)
 	l.logger.WithFields(fields).Debug(args...)
+}
+
+func (l *Logrus) Trace(mixedArgs ...interface{}) {
+	fields, args := l.fields(mixedArgs)
+	l.logger.WithFields(fields).Trace(args...)
 }
 
 func (l *Logrus) fields(mixedArgs []interface{}) (logrus.Fields, []interface{}) {
